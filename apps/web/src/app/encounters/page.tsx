@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { PageWrapper, PageHeader, Card, CardContent } from '@/components/ui';
 
 interface Encounter {
   id: string;
@@ -26,21 +27,53 @@ export default function EncountersPage() {
       });
   }, []);
 
-  if (loading) return <p>Loading encounters...</p>;
+  if (loading) {
+    return (
+      <PageWrapper className="py-8">
+        <div className="flex items-center justify-center">
+          <p className="text-secondary-600">Loading encounters...</p>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Encounters</h1>
-      <ul>
+    <PageWrapper className="py-8">
+      <PageHeader title="Encounters" />
+      
+      <div className="space-y-4">
         {encounters.map(encounter => (
-          <li key={encounter.id} style={{ margin: '10px 0', padding: '10px', border: '1px solid #ddd' }}>
-            <strong>ID:</strong> {encounter.id} | <strong>Patient:</strong> {encounter.patientId} | 
-            <strong>Date:</strong> {encounter.date} | Notes: {encounter.notes}
-          </li>
+          <Card key={encounter.id}>
+            <CardContent className="space-y-2">
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-secondary-900">ID:</span>{' '}
+                  <span className="font-mono text-secondary-700">{encounter.id}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-secondary-900">Patient:</span>{' '}
+                  <span className="text-secondary-700">{encounter.patientId}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-secondary-900">Date:</span>{' '}
+                  <span className="text-secondary-700">{encounter.date}</span>
+                </div>
+              </div>
+              <div>
+                <span className="font-medium text-secondary-900">Notes:</span>{' '}
+                <span className="text-secondary-700">{encounter.notes}</span>
+              </div>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
-      <p>No encounters? API stub - implement full.</p>
-    </main>
+        
+        {encounters.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-secondary-600">No encounters found. API stub - implement full.</p>
+          </div>
+        )}
+      </div>
+    </PageWrapper>
   );
 }
 
