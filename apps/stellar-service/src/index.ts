@@ -8,6 +8,10 @@ const horizon: Server = new Server(config.stellarHorizonUrl);
 const app = express();
 app.use(express.json());
 
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok", service: "health-watchers-stellar-service" });
+});
+
 app.post("/fund", async (req: Request, res: Response) => {
   const { publicKey } = req.body;
   if (!publicKey) return res.status(400).json({ error: "publicKey required" });
@@ -58,7 +62,7 @@ app.get("/verify/:hash", async (req: Request, res: Response) => {
   }
 });
 
-const port = process.env.STELLAR_PORT || 3002;
+const port = process.env.STELLAR_SERVICE_PORT || process.env.STELLAR_PORT || 3002;
 app.listen(Number(port), () => {
   console.log(`Health Watchers Stellar Service on port ${port}, network: ${config.stellarNetwork}`);
 });
