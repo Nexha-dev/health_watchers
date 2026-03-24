@@ -12,3 +12,9 @@
 - [x] 8. npm install && npm run dev executed, services ready (check terminals).
 
 Progress tracked here. Update on completion.
+
+## Next Steps:
+- [ ] 9. Add unit tests for auth and patient modules.
+- [ ] 10. Implement AI module controller and service.
+- [ ] 11. Add pagination to patients and encounters endpoints.
+- [ ] 12. Improve error handling and logging across API.
