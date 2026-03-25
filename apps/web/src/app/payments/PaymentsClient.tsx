@@ -63,22 +63,10 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
           {payments.map((p) => (
             <li key={p.id} className="rounded border border-gray-200 p-4 shadow-sm">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">{labels.id}</p>
-                  <p className="font-medium text-gray-900 break-all">{p.id}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">{labels.patient}</p>
-                  <p className="font-medium text-gray-900 break-all">{p.patientId}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">{labels.amount}</p>
-                  <p className="text-gray-700">{p.amount} XLM</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">{labels.status}</p>
-                  <p className="text-gray-700">{p.status}</p>
-                </div>
+                <div><p className="text-xs text-gray-500 uppercase">{labels.id}</p><p className="font-medium break-all">{p.id}</p></div>
+                <div><p className="text-xs text-gray-500 uppercase">{labels.patient}</p><p className="font-medium break-all">{p.patientId}</p></div>
+                <div><p className="text-xs text-gray-500 uppercase">{labels.amount}</p><p>{p.amount} XLM</p></div>
+                <div><p className="text-xs text-gray-500 uppercase">{labels.status}</p><p>{p.status}</p></div>
               </div>
               {p.txHash && (
                 <div className="mt-3 text-sm">
@@ -86,7 +74,7 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
                     href={`https://stellar.expert/explorer/testnet/tx/${p.txHash}`}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`${labels.view} transaction ${p.txHash} on Stellar Explorer (opens in new tab)`}
+                    aria-label={`${labels.view} transaction on Stellar Explorer (opens in new tab)`}
                     className="text-blue-600 hover:underline focus:outline-none focus:underline"
                   >
                     {labels.view} →
