@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Button, Input, Select } from '@/components/ui'
+import { queryKeys } from '@/lib/queryKeys'
 
 export interface PatientFormData {
   firstName: string
@@ -21,6 +23,7 @@ export interface PatientFormProps {
 
 const PatientForm = React.forwardRef<HTMLFormElement, PatientFormProps>(
   ({ initialData, isLoading = false, onSubmit, onCancel }, ref) => {
+    const queryClient = useQueryClient()
     const [formData, setFormData] = useState<PatientFormData>({
       firstName: initialData?.firstName || '',
       lastName: initialData?.lastName || '',
@@ -83,6 +86,8 @@ const PatientForm = React.forwardRef<HTMLFormElement, PatientFormProps>(
       setSubmitting(true)
       try {
         await onSubmit(formData)
+        // Invalidate patient list queries after successful submission
+        await queryClient.invalidateQueries({ queryKey: queryKeys.patients.all })
       } catch (error) {
         console.error('Form submission error:', error)
       } finally {

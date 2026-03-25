@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PageWrapper, PageHeader, Card, CardContent } from '@/components/ui';
+import { getStellarExplorerUrl } from '@/lib/stellar';
 
 interface Payment {
   id: string;
@@ -55,7 +56,7 @@ export default function PaymentsPage() {
               {payment.txHash && (
                 <div className="pt-2">
                   <span className="font-medium text-secondary-900">Transaction:</span>{' '}
-                  <a href={`https://stellar.expert/explorer/testnet/tx/${payment.txHash}`} target="_blank" rel="noopener noreferrer"
+                  <a href={getStellarExplorerUrl(payment.txHash, process.env.NEXT_PUBLIC_STELLAR_NETWORK || 'testnet')} target="_blank" rel="noopener noreferrer"
                     className="text-primary-600 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md px-1 py-0.5 transition-colors">
                     View on Stellar Expert
                   </a>

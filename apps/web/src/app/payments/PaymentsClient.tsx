@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ErrorMessage, Toast } from "@/components/ui";
 import { CreatePaymentIntentForm, type CreatePaymentData } from "@/components/forms/CreatePaymentIntentForm";
+import { getStellarExplorerUrl } from "@/lib/stellar";
+import { queryKeys } from "@/lib/queryKeys";
 
 const API = "http://localhost:3001/api/v1";
 
@@ -14,25 +17,19 @@ interface Labels {
 }
 
 export default function PaymentsClient({ labels }: { labels: Labels }) {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const fetchPayments = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    fetch(`${API}/payments`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Request failed (${res.status})`);
-        return res.json();
-      })
-      .then((data) => { setPayments(data.data || data || []); setLoading(false); })
-      .catch((err) => { setError(err.message || "Failed to load payments."); setLoading(false); });
-  }, []);
-
-  useEffect(() => { fetchPayments(); }, [fetchPayments]);
+  const { data: payments = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.payments.list(),
+    queryFn: async () => {
+      const res = await fetch(`${API}/payments`);
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const data = await res.json();
+      return data.data || data || [];
+    },
+  });
 
   const handleCreate = async (data: CreatePaymentData) => {
     const res = await fetch(`${API}/payments/intent`, {
@@ -46,11 +43,11 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
     }
     setShowForm(false);
     setToast({ message: "Payment intent created.", type: "success" });
-    fetchPayments();
+    queryClient.invalidateQueries({ queryKey: queryKeys.payments.list() });
   };
 
-  if (loading) return <p role="status" aria-live="polite" className="px-4 py-8 text-gray-500">{labels.loading}</p>;
-  if (error) return <ErrorMessage message={error} onRetry={fetchPayments} />;
+  if (isLoading) return <p role="status" aria-live="polite" className="px-4 py-8 text-gray-500">{labels.loading}</p>;
+  if (error) return <ErrorMessage message={error instanceof Error ? error.message : "Failed to load payments."} onRetry={() => queryClient.invalidateQueries({ queryKey: queryKeys.payments.list() })} />;
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -77,7 +74,7 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
         <p role="status" className="text-gray-500">{labels.empty}</p>
       ) : (
         <ul aria-label={labels.title} className="flex flex-col gap-4 list-none p-0 m-0">
-          {payments.map((p) => (
+          {payments.map((p: Payment) => (
             <li key={p.id} className="rounded border border-gray-200 p-4 shadow-sm">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                 <div><p className="text-xs text-gray-500 uppercase tracking-wide">{labels.id}</p><p className="font-medium text-gray-900 break-all">{p.id}</p></div>
@@ -87,7 +84,10 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
               </div>
               {p.txHash && (
                 <div className="mt-3 text-sm">
-                  <a href={`https://stellar.expert/explorer/testnet/tx/${p.txHash}`} target="_blank" rel="noreferrer"
+                  <a
+                    href={getStellarExplorerUrl(p.txHash, process.env.NEXT_PUBLIC_STELLAR_NETWORK || 'testnet')}
+                    target="_blank"
+                    rel="noreferrer"
                     aria-label={`${labels.view} transaction on Stellar Explorer (opens in new tab)`}
                     className="text-blue-600 hover:underline">
                     {labels.view} →
