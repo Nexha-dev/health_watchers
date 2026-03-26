@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ErrorMessage, Toast } from "@/components/ui";
+import { ErrorMessage, Toast, TableSkeleton, ModuleEmptyState, Button } from "@/components/ui";
 import { CreatePaymentIntentForm, type CreatePaymentData } from "@/components/forms/CreatePaymentIntentForm";
 import { getStellarExplorerUrl } from "@/lib/stellar";
 import { queryKeys } from "@/lib/queryKeys";
@@ -46,7 +46,7 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
     queryClient.invalidateQueries({ queryKey: queryKeys.payments.list() });
   };
 
-  if (isLoading) return <p role="status" aria-live="polite" className="px-4 py-8 text-gray-500">{labels.loading}</p>;
+  if (isLoading) return <TableSkeleton columns={4} rows={5} />;
   if (error) return <ErrorMessage message={error instanceof Error ? error.message : "Failed to load payments."} onRetry={() => queryClient.invalidateQueries({ queryKey: queryKeys.payments.list() })} />;
 
   return (
@@ -71,7 +71,10 @@ export default function PaymentsClient({ labels }: { labels: Labels }) {
       )}
 
       {payments.length === 0 ? (
-        <p role="status" className="text-gray-500">{labels.empty}</p>
+        <ModuleEmptyState 
+          module="payments"
+          action={<Button variant="primary" size="md" className="mt-2">Create Payment</Button>}
+        />
       ) : (
         <ul aria-label={labels.title} className="flex flex-col gap-4 list-none p-0 m-0">
           {payments.map((p: Payment) => (

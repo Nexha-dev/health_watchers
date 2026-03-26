@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ErrorMessage, Toast } from "@/components/ui";
+import { ErrorMessage, Toast, TableSkeleton, ModuleEmptyState, Button } from "@/components/ui";
 import { CreateEncounterForm, type CreateEncounterData } from "@/components/forms/CreateEncounterForm";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -45,7 +45,7 @@ export default function EncountersClient({ labels }: { labels: Labels }) {
     queryClient.invalidateQueries({ queryKey: queryKeys.encounters.list() });
   };
 
-  if (isLoading) return <p role="status" aria-live="polite" className="px-4 py-8 text-gray-500">{labels.loading}</p>;
+  if (isLoading) return <TableSkeleton columns={4} rows={5} />;
   if (error) return <ErrorMessage message={error instanceof Error ? error.message : "Failed to load encounters."} onRetry={() => queryClient.invalidateQueries({ queryKey: queryKeys.encounters.list() })} />;
 
   return (
@@ -70,7 +70,10 @@ export default function EncountersClient({ labels }: { labels: Labels }) {
       )}
 
       {encounters.length === 0 ? (
-        <p role="status" className="text-gray-500">{labels.empty}</p>
+        <ModuleEmptyState 
+          module="encounters"
+          action={<Button variant="primary" size="md" className="mt-2">Create Encounter</Button>}
+        />
       ) : (
         <ul aria-label={labels.title} className="flex flex-col gap-4 list-none p-0 m-0">
           {encounters.map((e: Encounter) => (

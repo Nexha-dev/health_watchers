@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { type Patient, formatDate } from "@health-watchers/types";
-import { ErrorMessage } from "@/components/ui";
+import { ErrorMessage, TableSkeleton, ModuleEmptyState, Button } from "@/components/ui";
 import { queryKeys } from "@/lib/queryKeys";
 
 interface Labels {
@@ -59,11 +59,14 @@ export default function PatientsClient({ labels }: { labels: Labels }) {
         />
       </div>
       {isLoading ? (
-        <p role="status" aria-live="polite" className="text-gray-500">{labels.loading}</p>
+        <TableSkeleton columns={6} rows={5} />
       ) : error ? (
         <ErrorMessage message={error instanceof Error ? error.message : "Failed to load patients."} onRetry={() => window.location.reload()} />
       ) : patients.length === 0 ? (
-        <p role="status" className="text-gray-500">{labels.empty}</p>
+        <ModuleEmptyState 
+          module="patients"
+          action={<Button variant="primary" size="md" className="mt-2">Add New Patient</Button>}
+        />
       ) : (
         <>
           <div className="md:hidden flex flex-col gap-4">
