@@ -208,6 +208,31 @@ export default function PatientDetailClient({
     },
   });
 
+  const [showAllergyForm, setShowAllergyForm] = useState(false);
+  const [allergyForm, setAllergyForm] = useState({ allergen: '', allergenType: 'drug', reaction: '', severity: 'mild' });
+  const [allergySubmitting, setAllergySubmitting] = useState(false);
+
+  const handleAddAllergy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAllergySubmitting(true);
+    try {
+      const res = await fetch(`${API_V1}/patients/${patientId}/allergies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(allergyForm),
+      });
+      if (!res.ok) throw new Error('Failed to add allergy');
+      setShowAllergyForm(false);
+      setAllergyForm({ allergen: '', allergenType: 'drug', reaction: '', severity: 'mild' });
+      refetchAllergies();
+      setToast({ message: 'Allergy recorded.', type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to add allergy.', type: 'error' });
+    } finally {
+      setAllergySubmitting(false);
+    }
+  };
+
   const canEdit = user && EDIT_ROLES.has(user.role);
 
   const handleCreatePayment = async (data: CreatePaymentData) => {
@@ -493,6 +518,61 @@ export default function PatientDetailClient({
 
         {/* Allergies tab */}
         <TabsContent value="allergies">
+          {canEdit && (
+            <div className="mb-4">
+              {showAllergyForm ? (
+                <form onSubmit={handleAddAllergy} className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm space-y-3">
+                  <h3 className="font-medium text-neutral-900">Add Allergy</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      required
+                      placeholder="Allergen (e.g. Penicillin)"
+                      value={allergyForm.allergen}
+                      onChange={e => setAllergyForm(f => ({ ...f, allergen: e.target.value }))}
+                      className="col-span-2 rounded border border-neutral-300 px-3 py-2 text-sm"
+                    />
+                    <select
+                      value={allergyForm.allergenType}
+                      onChange={e => setAllergyForm(f => ({ ...f, allergenType: e.target.value }))}
+                      className="rounded border border-neutral-300 px-3 py-2 text-sm"
+                    >
+                      <option value="drug">Drug</option>
+                      <option value="food">Food</option>
+                      <option value="environmental">Environmental</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <select
+                      value={allergyForm.severity}
+                      onChange={e => setAllergyForm(f => ({ ...f, severity: e.target.value }))}
+                      className="rounded border border-neutral-300 px-3 py-2 text-sm"
+                    >
+                      <option value="mild">Mild</option>
+                      <option value="moderate">Moderate</option>
+                      <option value="severe">Severe</option>
+                      <option value="life-threatening">Life-threatening</option>
+                    </select>
+                    <input
+                      required
+                      placeholder="Reaction (e.g. Anaphylaxis)"
+                      value={allergyForm.reaction}
+                      onChange={e => setAllergyForm(f => ({ ...f, reaction: e.target.value }))}
+                      className="col-span-2 rounded border border-neutral-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="submit" disabled={allergySubmitting} className="rounded bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
+                      {allergySubmitting ? 'Saving…' : 'Save Allergy'}
+                    </button>
+                    <button type="button" onClick={() => setShowAllergyForm(false)} className="rounded border border-neutral-300 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <Button size="sm" onClick={() => setShowAllergyForm(true)}>+ Add Allergy</Button>
+              )}
+            </div>
+          )}
           {allergiesLoading ? (
             <div className="space-y-3" aria-busy="true">
               {[1, 2].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-neutral-100" />)}

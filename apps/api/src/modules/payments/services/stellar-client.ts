@@ -110,6 +110,23 @@ class StellarClient {
   }
 
   /**
+   * Transfer all XLM from one account to another (used during keypair rotation)
+   * Calls the stellar-service POST /transfer endpoint
+   */
+  async transferBalance(
+    fromPublicKey: string,
+    toPublicKey: string,
+  ): Promise<{ transferred: boolean; amount?: string; hash?: string }> {
+    const secret = process.env.STELLAR_SERVICE_SECRET;
+    const response = await this.client.post(
+      '/transfer',
+      { fromPublicKey, toPublicKey },
+      { headers: { Authorization: `Bearer ${secret}` } },
+    );
+    return response.data;
+  }
+
+  /**
    * Check if the stellar-service is healthy
    */
   async healthCheck(): Promise<{ status: string; network: string; dryRun: boolean }> {

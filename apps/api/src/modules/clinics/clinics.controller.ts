@@ -208,6 +208,13 @@ router.post(
       // Update clinic's public key
       await ClinicModel.findByIdAndUpdate(req.params.id, { stellarPublicKey: publicKey });
 
+      // Transfer remaining balance from old account to new account (non-blocking)
+      if (clinic.stellarPublicKey && clinic.stellarPublicKey !== publicKey) {
+        stellarClient
+          .transferBalance(clinic.stellarPublicKey, publicKey)
+          .catch((err) => logger.warn({ err }, 'Balance transfer during keypair rotation failed'));
+      }
+
       // Fund testnet account (non-blocking)
       if (config.stellarNetwork === 'testnet') {
         stellarClient.fundAccount(publicKey).catch((err) =>
