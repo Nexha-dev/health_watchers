@@ -23,6 +23,7 @@ export interface Prescription {
   frequency: string;
   duration?: string;
   notes?: string;
+  allergyOverride?: { allergyId: string; reason: string };
 }
 
 export interface Encounter {
@@ -65,11 +66,15 @@ const diagnosisSchema = new Schema<Diagnosis>(
 
 const prescriptionSchema = new Schema<Prescription>(
   {
-    medication: { type: String, required: true },
-    dosage:     { type: String, required: true },
-    frequency:  { type: String, required: true },
-    duration:   { type: String },
-    notes:      { type: String },
+    medication:     { type: String, required: true },
+    dosage:         { type: String, required: true },
+    frequency:      { type: String, required: true },
+    duration:       { type: String },
+    notes:          { type: String },
+    allergyOverride: {
+      type: new Schema({ allergyId: String, reason: String }, { _id: false }),
+      default: undefined,
+    },
   },
 );
 

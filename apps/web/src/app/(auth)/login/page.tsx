@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -20,6 +20,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo') ?? '/';
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -51,7 +53,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/');
+      router.push(returnTo);
     } catch {
       setServerError('Something went wrong. Please try again.');
     }
